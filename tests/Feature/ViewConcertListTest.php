@@ -3,9 +3,14 @@
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Carbon\Carbon;
+
+use App\Concert;
 
 class ViewConcertListTest extends TestCase
 {
+    use DatabaseMigrations;
+
     /** @test */
     public function user_can_view_a_concert_listing()
     {
