@@ -12,7 +12,7 @@ class ViewConcertListTest extends TestCase
     use DatabaseMigrations;
 
     /** @test */
-    public function user_can_view_a_concert_listing()
+    public function user_can_view_a_published_concert_listing()
     {
         // Arrange
         // Create a concert
@@ -27,6 +27,7 @@ class ViewConcertListTest extends TestCase
             'state' => 'ON',
             'zip' => '17916',
             'additional_information' => 'For tickets, call (555) 555-555.',
+            'published_at' => Carbon::parse('-1 week'),
         ]);
 
         // Act
@@ -44,5 +45,20 @@ class ViewConcertListTest extends TestCase
         $this->see('123 Example Lane');
         $this->see('Laraville, ON 17916');
         $this->see('For tickets, call (555) 555-555.');
+    }
+
+    /** @test */
+    public function user_cannot_view_a_unpublished_concert_listing()
+    {
+        // Arrange
+        $concert = factory(Concert::class)->create([
+            'published_at' => null,
+        ]);
+
+        // Act
+        $this->get('/concerts/' . $concert->id);
+
+        // Assert
+        $this->assertResponseStatus(404);
     }
 }
