@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Concert;
 use App\Billing\PaymentGateway;
+use App\Billing\PaymentFailedException;
 
 class ConcertOrdersController extends Controller
 {
@@ -25,17 +26,14 @@ class ConcertOrdersController extends Controller
             'payment_token' => ['required'],
         ]);
 
-        $concert = Concert::find($concertId);
-        $this->paymentGateway->charge(request('ticket_quantity') * $concert->ticket_price, request('payment_token'));
+        try {
+            $concert = Concert::find($concertId);
+            $this->paymentGateway->charge(request('ticket_quantity') * $concert->ticket_price, request('payment_token'));
+            $concert->orderTickets(request('email'), request('ticket_quantity'));
 
-        $order = $concert->orders()->create([
-            'email' => request('email'),
-        ]);
-
-        foreach(range(1, request('ticket_quantity')) as $i) {
-            $order->tickets()->create([]);
+            return response()->json([], 201);
+        } catch (PaymentFailedException $e) {
+            return response()->json([], 422);
         }
-
-        return response()->json([], 201);
     }
 }

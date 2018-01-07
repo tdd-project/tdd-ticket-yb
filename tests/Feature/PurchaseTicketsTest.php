@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use App\Concert;
 use App\Billing\FakePaymentGateway;
 use App\Billing\PaymentGateway;
+use App\Billing\PaymentFailedException;
 
 class PurchaseTicketsTest extends TestCase
 {
@@ -125,5 +126,26 @@ class PurchaseTicketsTest extends TestCase
         ]);
 
         $this->assertValidationError('payment_token');
+    }
+
+    /** @test */
+    function an_order_is_not_created_if_payment_fails()
+    {
+        $concert = factory(Concert::class)->create();
+
+        try {
+            $this->orderTickets($concert, [
+                'email' => 'john@example.com',
+                'ticket_quantity' => 3,
+                'payment_token' => 'invalid-payment-token',
+            ]);
+        } catch (PaymentFailedException $e) {
+            return;
+        }
+
+        $this->assertResponseStatus(422);
+
+        $order = $concert->orders()->where('email', 'john@example.com')->first();
+        $this->assertNull($order);
     }
 }
