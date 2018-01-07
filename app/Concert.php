@@ -10,6 +10,13 @@ class Concert extends Model
     protected $guarded = [];
     protected $dates = ['date'];
 
+    // Relationships
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    //
     public function getFormattedDateAttribute()
     {
         return $this->date->format('F j, Y');
