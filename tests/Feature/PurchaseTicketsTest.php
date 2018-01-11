@@ -36,6 +36,7 @@ class PurchaseTicketsTest extends TestCase
     /** @test */
     public function customer_can_purchase_concert_tickets()
     {
+        $this->disableExceptionHandling();
         // Arrange
         $concert = factory(Concert::class)->states('published')->create([
             'ticket_price' => 3250,
@@ -141,6 +142,7 @@ class PurchaseTicketsTest extends TestCase
     /** @test */
     function an_order_is_not_created_if_payment_fails()
     {
+        $this->disableExceptionHandling();
         $concert = factory(Concert::class)->states('published')->create();
         $concert->addTickets(3);
 
